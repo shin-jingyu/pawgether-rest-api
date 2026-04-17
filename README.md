@@ -1,8 +1,10 @@
-# Pawgether BE
+# Pawgether REST API
 
 반려동물 박람회 정보를 조회하고, 게시글에 댓글·대댓글·좋아요·북마크를 남길 수 있는 Spring Boot 백엔드 프로젝트입니다.
 
-현재 구조는 `command/query` 분리와 `usecase` 중심 설계를 사용하고 있으며, 이후 외부 API를 더 RESTful하게 다듬는 방향으로 리팩터링할 예정입니다.
+이 프로젝트는 단순히 기능을 구현하는 것에서 끝나지 않고, REST를 다시 공부하면서 "왜 이런 URI와 HTTP 메서드를 써야 하는가"를 실제 코드에 적용해보는 과정까지 함께 담고 있습니다.
+
+처음에는 REST를 "예쁜 URL 규칙" 정도로만 이해한 부분이 있었지만, 다시 정리해보면서 리소스 중심 설계, Uniform Interface, 자기서술적 메시지, 클라이언트-서버의 역할 분리 관점에서 API를 다시 바라보게 되었습니다.
 
 ## Tech Stack
 
@@ -14,7 +16,7 @@
 - Spring Data JPA
 - QueryDSL
 - PostgreSQL
-- Redis
+- Valkey(Redis compatible)
 - JWT
 - OAuth2 (Google, Naver, Kakao)
 - AWS SDK S3 compatible client
@@ -50,6 +52,103 @@ src/main/java/com/example/pawgetherbe
 └── usecase       # 도메인별 유스케이스
 ```
 
+## What I Re-learned About REST
+
+### 1. REST는 URI 작명 규칙만이 아니다
+
+예전에는 REST를 "동사가 아닌 명사를 써야 한다", "슬래시를 이렇게 써야 한다" 정도로만 이해한 부분이 있었습니다.  
+다시 공부하면서 REST는 분산 하이퍼미디어 시스템을 위한 아키텍처 스타일이고, 핵심은 리소스를 일관된 인터페이스로 다루는 데 있다는 점을 다시 정리했습니다.
+
+### 2. Uniform Interface가 핵심이다
+
+REST에서 중요한 것은 URL이 예뻐 보이는가가 아니라, 클라이언트가 일관된 방식으로 리소스를 다룰 수 있는가입니다.
+
+- 리소스는 URI로 식별한다.
+- 행위는 HTTP Method로 표현한다.
+- 메시지는 스스로 의미를 설명할 수 있어야 한다.
+- 클라이언트는 서버 내부 구현이 아니라 표현(Representation)을 통해 리소스를 다룬다.
+
+예를 들어 `signup`, `filter`, `exists`, `count`처럼 기능 중심 이름을 URI에 직접 드러내기보다,  
+`users`, `sessions`, `petfairs`, `comments` 같은 리소스를 기준으로 설계하는 것이 REST에 더 가깝습니다.
+
+### 3. 클라이언트와 서버는 독립적으로 진화해야 한다
+
+REST는 클라이언트와 서버의 책임을 분리합니다.  
+서버는 리소스와 상태 전이를 HTTP 인터페이스로 제공하고, 클라이언트는 그 인터페이스를 소비합니다.
+
+이 관점이 중요했던 이유는, 서버 내부 구현이나 유스케이스 이름이 외부 API 설계에 그대로 노출되면 API가 기능 중심으로 굳어지고, 이후 프론트엔드나 다른 클라이언트와 함께 발전시키기 어려워지기 때문입니다.
+
+### 4. 자기서술적 메시지(Self-descriptive Message)를 더 의식하게 되었다
+
+REST API는 요청과 응답만 봐도 의미를 파악하기 쉬워야 합니다.
+
+- `GET /api/v1/petfairs/3`
+- `POST /api/v1/petfairs`
+- `DELETE /api/v1/petfairs/3`
+
+이런 형태는 URI와 메서드만 봐도 의도가 비교적 분명합니다.  
+반면 `POST /filter`, `GET /exists/...`, `POST /count` 같은 형태는 동작은 알 수 있어도 "무슨 리소스를 다루는가"가 흐려질 수 있습니다.
+
+### 5. HATEOAS까지 포함해야 REST가 완성되지만, 현재는 Richardson Level 2에 가까운 상태다
+
+이번에 다시 정리하면서 REST의 이상적인 형태에는 하이퍼미디어 기반 상태 전이(HATEOAS)까지 포함된다는 점도 놓치고 있었다는 걸 알게 되었습니다.  
+현재 이 프로젝트는 HTTP Method, 상태 코드, 리소스 중심 URI를 정리하는 단계에 집중하고 있기 때문에, 엄밀히 말하면 완전한 REST보다는 RESTful API에 가까운 상태입니다.
+
+## How I Applied It To This Project
+
+이 프로젝트는 내부적으로 `command/query` 분리와 `usecase` 중심 구조를 사용합니다.  
+다만 외부 API는 한동안 기능 중심 URI가 섞여 있었고, 이번 정리를 통해 "외부에는 리소스 중심 인터페이스를 드러내자"는 방향을 더 분명히 하게 되었습니다.
+
+현재 코드에서 이미 반영된 부분은 아래와 같습니다.
+
+- 게시글 리소스를 `petfairs`로 통일해 `GET /api/v1/petfairs`, `GET /api/v1/petfairs/{petfairId}`, `PATCH /api/v1/petfairs/{petfairId}`처럼 접근
+- 조회는 가능한 한 `GET`, 생성은 `POST`, 수정은 `PATCH`, 삭제는 `DELETE`로 역할을 나눔
+- 리소스 컬렉션과 단건 리소스를 구분하려고 시도함
+
+예:
+
+- `GET /api/v1/petfairs`
+- `GET /api/v1/petfairs/{petfairId}`
+- `POST /api/v1/petfairs`
+- `PATCH /api/v1/petfairs/{petfairId}`
+- `DELETE /api/v1/petfairs/{petfairId}`
+
+## Before vs Now
+
+REST를 다시 공부하기 전에는 "기능이 동작하느냐"에 더 집중했고, API 이름도 자연스럽게 기능 중심으로 흘러가는 경우가 있었습니다.  
+지금은 "이 요청이 어떤 리소스에 대한 조작인가?"를 먼저 생각한 뒤 URI와 메서드를 정리하려고 하고 있습니다.
+
+| 관점 | 이전 | 현재 |
+| --- | --- | --- |
+| 설계 기준 | 기능 구현 중심 | 리소스 중심 + HTTP 의미 반영 |
+| URI 표현 | `signup`, `filter`, `count`, `exists` 같은 동작/기능 중심 표현 | `petfairs`, `comments`, `replies` 같은 리소스 중심 표현 우선 |
+| 메서드 사용 | URI가 행위를 설명하는 경우가 많았음 | `GET`, `POST`, `PATCH`, `DELETE`에 행위를 맡기려는 방향 |
+| REST 이해 | URL 규칙 위주로 이해 | Uniform Interface, Self-descriptive Message, 역할 분리까지 고려 |
+| 문서화 시선 | "무엇을 만들었는가" 중심 | "왜 이렇게 설계했는가"까지 설명 |
+
+## Remaining Gaps
+
+아직 모든 API가 완전히 RESTful하게 정리된 것은 아닙니다. 현재 코드에는 아래와 같은 개선 여지가 남아 있습니다.
+
+- `/api/v1/account/signup`
+- `/api/v1/petfairs/filter`
+- `/api/v1/petfairs/count`
+- `/api/v1/comments/count/{petfairId}`
+- `/api/v1/likes/exists/{targetType}/{targetId}`
+- `/api/v1/replies/count`
+
+이 엔드포인트들은 기능 중심 URI가 일부 남아 있는 예시입니다.  
+예를 들어 아래와 같은 방향으로 더 정리할 수 있습니다.
+
+- `POST /api/v1/users`
+- `POST /api/v1/sessions`
+- `GET /api/v1/petfairs?filterStatus=ONGOING`
+- `GET /api/v1/petfairs/{petfairId}/comments`
+- `GET /api/v1/comments/{commentId}/replies`
+
+즉, 이번 리드미 정리는 "REST를 적용 완료했다"는 선언보다,  
+"REST를 다시 공부하면서 어떤 부분을 놓쳤는지 이해했고, 그 관점으로 API를 계속 다듬고 있다"는 개발 기록에 더 가깝습니다.
+
 ## Runtime Requirements
 
 - JDK 21
@@ -61,7 +160,7 @@ src/main/java/com/example/pawgetherbe
 
 - API 서버: `8080`
 - PostgreSQL: `5433`
-- Redis/Valkey: `6379`
+- Valkey: `6379`
 
 ## Getting Started
 
@@ -80,16 +179,28 @@ docker compose up -d
 
 기본 설정 파일:
 
-- [application.yml](/Users/jingyu/Documents/jingyu/pawgether-be/src/main/resources/application.yml)
-- [application-local.yml](/Users/jingyu/Documents/jingyu/pawgether-be/src/main/resources/application-local.yml)
+- `src/main/resources/application.yml`
 
-현재 프로젝트는 `local` 프로필이 기본 활성화되어 있습니다.
+현재 로컬 개발 설정에는 DB, Redis, JWT 시크릿 값이 포함되어 있습니다.
 
 ```yaml
 spring:
-  profiles:
-    active: local
+  datasource:
+    url: jdbc:postgresql://localhost:5433/demo
+    username: root
+    password: root
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
 ```
+
+실제 협업 또는 배포 환경에서는 민감 정보를 코드에 직접 두기보다 아래 방식으로 분리하는 편이 더 안전합니다.
+
+- 환경 변수 사용
+- 비공개 설정 파일 분리
+- 프로필별 설정 분리
 
 ### 3. 서버 실행
 
@@ -105,35 +216,6 @@ spring:
 ./gradlew test
 ```
 
-## Configuration Overview
-
-현재 설정상 로컬 실행에 필요한 주요 항목은 아래와 같습니다.
-
-- DB 연결 정보
-- Redis 연결 정보
-- JWT 시크릿 키
-- OAuth 제공자별 클라이언트 정보
-- Cloudflare R2 접근 정보
-
-실제 협업 환경에서는 민감 정보를 `application-local.yml`에 직접 커밋하기보다 아래 방식으로 분리하는 것을 권장합니다.
-
-- 환경 변수 사용
-- `.env` 또는 비공개 설정 파일 분리
-- `application-local.yml`은 예시 템플릿만 유지
-
-예시:
-
-```yaml
-spring:
-  datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
-
-jwt:
-  secret-key: ${JWT_SECRET_KEY}
-```
-
 ## API Domains
 
 현재 컨트롤러 기준 주요 도메인은 아래와 같습니다.
@@ -145,47 +227,22 @@ jwt:
 - Like
 - Bookmark
 
-컨트롤러 위치:
+관련 패키지:
 
-- [controller/command](/Users/jingyu/Documents/jingyu/pawgether-be/src/main/java/com/example/pawgetherbe/controller/command)
-- [controller/query](/Users/jingyu/Documents/jingyu/pawgether-be/src/main/java/com/example/pawgetherbe/controller/query)
-
-## Design Notes
-
-이 프로젝트는 내부적으로는 유스케이스가 잘 분리되어 있지만, 외부 API는 아직 일부가 기능 중심 URI를 사용하고 있습니다.
-
-예:
-
-- `/api/v1/account/signup`
-- `/api/v1/petfairs/filter`
-- `/api/v1/comments/count/{petfairId}`
-- `/api/v1/likes/exists/{targetType}/{targetId}`
-
-향후에는 아래 방향으로 RESTful하게 정리할 계획입니다.
-
-- URI는 리소스 중심으로 구성
-- 동작은 HTTP Method로 표현
-- 조회 API는 `GET`으로 정리
-- 하위 리소스는 관계 중심 URI로 재구성
-
-예:
-
-- `POST /api/v1/users`
-- `POST /api/v1/sessions`
-- `GET /api/v1/petfairs?status=...`
-- `GET /api/v1/petfairs/{petfairId}/comments`
-- `POST /api/v1/comments/{commentId}/replies`
+- `src/main/java/com/example/pawgetherbe/controller/command`
+- `src/main/java/com/example/pawgetherbe/controller/query`
 
 ## Future Improvements
 
-- 외부 API URI RESTful 리팩터링
+- 기능 중심 URI를 리소스 중심 URI로 계속 정리
+- 중첩 리소스 구조 정리
+- 상태 코드와 응답 메시지 규칙 통일
 - 민감 정보 설정 분리
 - Swagger/OpenAPI 문서화
-- 배포 환경별 설정 정리
 - 테스트 범위 확대
 
 ## Entry Point
 
 애플리케이션 시작 클래스:
 
-- [PawgetherBeApplication.java](/Users/jingyu/Documents/jingyu/pawgether-be/src/main/java/com/example/pawgetherbe/PawgetherBeApplication.java)
+- `src/main/java/com/example/pawgetherbe/PawgetherBeApplication.java`
