@@ -101,7 +101,7 @@ class PetFairQueryApiTest {
                 jsonPath("$.petFairId") { value(petFairId) }
                 jsonPath("$.userId") { value(userId) }
                 jsonPath("$.title") { value("2025 메가주 일산(상) 1") }
-                jsonPath("$.images[0].imageUrl") { value("images/content/2025/05/0515-1.webp")}
+                jsonPath("$.images[0]") { value("images/content/2025/05/0515-1.webp")}
             }
         }
     }
@@ -144,7 +144,7 @@ class PetFairQueryApiTest {
         whenever(countPostsUseCase.countActiveByFilterStatus(status))
             .thenReturn(PetFairCountByStatusResponse(status, expectedCount))
 
-        mockMvc.get("/api/v1/petfairs/count/{filterStatus}", status)
+        mockMvc.get("/api/v1/petfairs/counts/{filterStatus}", status)
             .andExpect {
                 status { isOk() }
                 content {

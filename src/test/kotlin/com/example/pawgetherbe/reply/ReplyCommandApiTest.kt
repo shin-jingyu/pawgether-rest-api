@@ -4,7 +4,6 @@ import com.example.pawgetherbe.common.exceptionHandler.CustomException
 import com.example.pawgetherbe.common.exceptionHandler.GlobalExceptionHandler
 import com.example.pawgetherbe.controller.command.ReplyCommandApi
 import com.example.pawgetherbe.controller.command.dto.ReplyCommandDto
-import com.example.pawgetherbe.controller.command.dto.ReplyCommandDto.ReplyUpdateRequest
 import com.example.pawgetherbe.domain.UserContext
 import com.example.pawgetherbe.exception.command.CommentCommandErrorCode
 import com.example.pawgetherbe.exception.command.ReplyCommandErrorCode
@@ -44,46 +43,39 @@ class ReplyCommandApiTest: FreeSpec({
     "답글 생성 api" - {
         "답글 생성 성공" {
             // given
-            var replyCreateRequest = ReplyCommandDto.ReplyCreateRequest(
-                1L,
-                "test"
-            )
+            var replyCreateRequest = ReplyCommandDto.ReplyCreateBody("test")
             var replyCreateResponse = ReplyCommandDto.ReplyCreateResponse(
                 1L,
                 1L,
                 1L,
                 "test",
                 "",
-                "",
-                0
+                ""
             )
 
             every { registryReplyUseCase.replyCreate(any()) } returns replyCreateResponse
 
             // when
-            mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/replies")
+            mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/comments/{commentId}/replies", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
                 .content(objectMapper.writeValueAsString(replyCreateRequest))
-            ).andExpect(status().isOk)
+            ).andExpect(status().isCreated)
 
             // then
             verify(exactly = 1) { registryReplyUseCase.replyCreate(any()) }
         }
 
         "답글 생성 실패" - {
-            var replyCreateRequest = ReplyCommandDto.ReplyCreateRequest(
-                1L,
-                "test"
-            )
+            var replyCreateRequest = ReplyCommandDto.ReplyCreateBody("test")
 
             "user 정보가 없을 때" {
                 // given
                 every { registryReplyUseCase.replyCreate(any()) } throws CustomException (UserCommandErrorCode.NOT_FOUND_USER)
 
                 // then,when
-                mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/replies")
+                mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/comments/{commentId}/replies", 1L)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding("UTF-8")
@@ -98,7 +90,7 @@ class ReplyCommandApiTest: FreeSpec({
                 every { registryReplyUseCase.replyCreate(any()) } throws CustomException (CommentCommandErrorCode.NOT_FOUND_COMMENT)
 
                 // then,when
-                mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/replies")
+                mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/comments/{commentId}/replies", 1L)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding("UTF-8")
@@ -113,7 +105,7 @@ class ReplyCommandApiTest: FreeSpec({
                 every { registryReplyUseCase.replyCreate(any()) } throws CustomException (ReplyCommandErrorCode.CREATE_INTERNAL_REPLY)
 
                 // then,when
-                mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/replies")
+                mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/comments/{commentId}/replies", 1L)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding("UTF-8")
@@ -129,24 +121,19 @@ class ReplyCommandApiTest: FreeSpec({
     "답글 업데이트" - {
         "답글 업데이트 성공" {
             // given
-            var replyUpdateRequest = ReplyUpdateRequest(
-                1L,
-                1L,
-                "test"
-            )
+            var replyUpdateRequest = ReplyCommandDto.ReplyUpdateBody("test")
             var replyUpdateResponse = ReplyCommandDto.ReplyUpdateResponse(
                 1L,
                 1L,
                 1L,
                 "test",
                 "",
-                "",
-                0
+                ""
             )
             every { editReplyUseCase.updateReply(any()) } returns replyUpdateResponse
 
             // when
-            mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/replies")
+            mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/comments/{commentId}/replies/{replyId}", 1L, 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
@@ -158,17 +145,13 @@ class ReplyCommandApiTest: FreeSpec({
         }
 
         "답글 업데이트 실패" - {
-            var replyUpdateRequest = ReplyUpdateRequest(
-                1L,
-                1L,
-                "test"
-            )
+            var replyUpdateRequest = ReplyCommandDto.ReplyUpdateBody("test")
             "user 정보가 없을 때" {
                 // given
                 every { editReplyUseCase.updateReply(any()) } throws CustomException (UserCommandErrorCode.NOT_FOUND_USER)
 
                 // then,when
-                mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/replies")
+                mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/comments/{commentId}/replies/{replyId}", 1L, 1L)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding("UTF-8")
@@ -183,7 +166,7 @@ class ReplyCommandApiTest: FreeSpec({
                 every { editReplyUseCase.updateReply(any()) } throws CustomException (CommentCommandErrorCode.NOT_FOUND_COMMENT)
 
                 // then,when
-                mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/replies")
+                mockMvc.perform(MockMvcRequestBuilders.patch("/api/v1/comments/{commentId}/replies/{replyId}", 1L, 1L)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding("UTF-8")
@@ -202,7 +185,7 @@ class ReplyCommandApiTest: FreeSpec({
             every { deleteReplyUseCase.deleteReply(any(), any()) } just Runs
 
             // when
-            mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/replies/{commentId}/{replyId}",1L,1L)
+            mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/comments/{commentId}/replies/{replyId}",1L,1L)
             ).andExpect(status().isNoContent)
 
             //then
@@ -214,7 +197,7 @@ class ReplyCommandApiTest: FreeSpec({
                 every { deleteReplyUseCase.deleteReply(any(), any()) } throws CustomException (UserCommandErrorCode.NOT_FOUND_USER)
 
                 // then,when
-                mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/replies/{commentId}/{replyId}",1L,1L)
+                mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/comments/{commentId}/replies/{replyId}",1L,1L)
                 ).andExpect(status().is4xxClientError)
                     .andExpect(jsonPath("$.code").value("NOT_FOUND_USER"))
                     .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -225,7 +208,7 @@ class ReplyCommandApiTest: FreeSpec({
                 every { deleteReplyUseCase.deleteReply(any(), any()) } throws CustomException (CommentCommandErrorCode.NOT_FOUND_COMMENT)
 
                 // then,when
-                mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/replies/{commentId}/{replyId}",1L,1L)
+                mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/comments/{commentId}/replies/{replyId}",1L,1L)
                 ).andExpect(status().is4xxClientError)
                     .andExpect(jsonPath("$.code").value("NOT_FOUND_COMMENT"))
                     .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
@@ -236,7 +219,7 @@ class ReplyCommandApiTest: FreeSpec({
                 every { deleteReplyUseCase.deleteReply(any(), any()) } throws CustomException (ReplyCommandErrorCode.DELETE_CONFLICT_REPLY)
 
                 // then,when
-                mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/replies/{commentId}/{replyId}",1L,1L)
+                mockMvc.perform(MockMvcRequestBuilders.delete("/api/v1/comments/{commentId}/replies/{replyId}",1L,1L)
                 ).andExpect(status().is4xxClientError)
                     .andExpect(jsonPath("$.code").value("DELETE_CONFLICT_REPLY"))
                     .andExpect(jsonPath("$.status").value(HttpStatus.CONFLICT.value()))

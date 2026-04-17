@@ -33,9 +33,9 @@ class ReplyQueryServiceTest: FreeSpec({
         "답글 조회 성공" {
             // given
             var ReplyReadDtos = listOf(
-                ReplyQueryDto.ReplyReadDto(1L,1L, "a", "a", "", "", 0),
-                ReplyQueryDto.ReplyReadDto(2L,1L, "b", "b", "", "", 0),
-                ReplyQueryDto.ReplyReadDto(3L,1L, "c", "c", "", "", 0)
+                ReplyQueryDto.ReplyReadDto(1L,1L, "a", "a", "", ""),
+                ReplyQueryDto.ReplyReadDto(2L,1L, "b", "b", "", ""),
+                ReplyQueryDto.ReplyReadDto(3L,1L, "c", "c", "", "")
             )
             var ReplyReadResponse = ReplyReadResponse(
                 false,

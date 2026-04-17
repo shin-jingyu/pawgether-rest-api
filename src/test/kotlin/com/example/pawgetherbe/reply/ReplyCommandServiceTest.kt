@@ -123,8 +123,7 @@ class ReplyCommandServiceTest: FreeSpec({
                 1L,
                 replyUpdateRequest.content,
                 "",
-                "",
-                0
+                ""
             )
             every { replyCommandRepository.findById(any()) } returns Optional.of(replyEntity)
             every { replyCommandMapper.toReplyUpdateResponse(any()) } returns replyUpdateResponse

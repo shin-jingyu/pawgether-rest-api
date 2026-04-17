@@ -55,8 +55,7 @@ class CommentCommandServiceTest: FreeSpec({
                 1L,
                 commentCreateRequest.content,
                 "",
-                "",
-                0
+                ""
             )
             val commentEntity = CommentEntity.builder()
                 .id(1L)
@@ -118,7 +117,7 @@ class CommentCommandServiceTest: FreeSpec({
         "댓글 업데이트 성공" {
             // given
             var commentUpdateRequest = CommentCommandDto.CommentUpdateRequest("test")
-            var commentUpdateResponse = CommentCommandDto.CommentUpdateResponse(1L, 1L, 1L, "test2", "", "", 0)
+            var commentUpdateResponse = CommentCommandDto.CommentUpdateResponse(1L, 1L, 1L, "test2", "", "")
             var commentEntity = CommentEntity.builder().content("테스트").build()
 
             every { commentCommandRepository.findById(any()) } returns Optional.of(commentEntity)

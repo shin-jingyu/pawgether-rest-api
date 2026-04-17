@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/comments")
+@RequestMapping("/api/v1/petfairs/{petfairId}/comments")
 @RequiredArgsConstructor
 @Slf4j
 public class CommentQueryApi {
 
     private final ReadCommentsUseCase readCommentsUseCase;
 
-    @GetMapping("{petfairId}")
+    @GetMapping
     public ReadCommentResponse readComments(@PathVariable("petfairId") long petfairId, @RequestParam(required = false, defaultValue = "0") long cursor) {
         return readCommentsUseCase.readComments(petfairId, cursor);
     }
 
-    @GetMapping("/count/{petfairId}")
+    @GetMapping("/count")
     public CommentCountResponse commentCountResponse(@PathVariable("petfairId") long petfairId) {
         return readCommentsUseCase.commentCount(petfairId);
     }

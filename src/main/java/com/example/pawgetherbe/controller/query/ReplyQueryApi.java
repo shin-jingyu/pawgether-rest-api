@@ -15,18 +15,18 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/replies")
+@RequestMapping
 @RequiredArgsConstructor
 public class ReplyQueryApi {
 
     private final ReadRepliesUseCase readRepliesUseCase;
 
-    @GetMapping("/{commentId}")
+    @GetMapping("/api/v1/comments/{commentId}/replies")
     public ReplyReadResponse readReplies(@PathVariable long commentId, @RequestParam(required = false, defaultValue = "0") long cursor) {
         return readRepliesUseCase.readReplies(commentId, cursor);
     }
 
-    @PostMapping("/count")
+    @PostMapping("/api/v1/comments/reply-counts")
     public ReplyCountResponse replyCountResponse(@RequestBody List<Long> commentIdList) {
         return readRepliesUseCase.replyCountResponse(commentIdList);
     }

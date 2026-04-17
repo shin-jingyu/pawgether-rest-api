@@ -49,11 +49,11 @@ public class JwtAuthFilter implements Filter {
             new ExcludeRule(HttpMethod.GET,  "/api/v1/account/oauth/naver"),
             new ExcludeRule(HttpMethod.GET,  "/api/v1/account/oauth/google"),
 
-            new ExcludeRule(HttpMethod.GET,  "/api/v1/comments/*"),
-            new ExcludeRule(HttpMethod.GET,  "/api/v1/comments/count/*"),
+            new ExcludeRule(HttpMethod.GET,  "/api/v1/petfairs/*/comments"),
+            new ExcludeRule(HttpMethod.GET,  "/api/v1/petfairs/*/comments/count"),
 
-            new ExcludeRule(HttpMethod.GET,  "/api/v1/replies/*"),
-            new ExcludeRule(HttpMethod.POST, "/api/v1/replies/count")
+            new ExcludeRule(HttpMethod.GET,  "/api/v1/comments/*/replies"),
+            new ExcludeRule(HttpMethod.POST, "/api/v1/comments/reply-counts")
     );
 
     private boolean isExcluded(HttpServletRequest request) {

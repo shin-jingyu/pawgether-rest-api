@@ -55,20 +55,19 @@ class CommentCommandApiTest: FreeSpec({
                 1L,
                 commentCreateRequest.content,
                 "",
-                "",
-                0
+                ""
             )
 
             every { registryCommentUseCase.createComment(any(), any()) } returns commentCreateResponse
 
             // when
             mockMvc.perform(
-                MockMvcRequestBuilders.post("/api/v1/comments/{petfairId}",1L)
+                MockMvcRequestBuilders.post("/api/v1/petfairs/{petfairId}/comments",1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .characterEncoding("UTF-8")
                 .content(objectMapper.writeValueAsString(commentCreateRequest))
-            ).andExpect(status().isOk)
+            ).andExpect(status().isCreated)
 
             // then
             verify(exactly = 1) { registryCommentUseCase.createComment(any(), any()) }
@@ -83,7 +82,7 @@ class CommentCommandApiTest: FreeSpec({
 
                 // when
                 mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/v1/comments/{petfairId}",1L)
+                    MockMvcRequestBuilders.post("/api/v1/petfairs/{petfairId}/comments",1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
@@ -99,7 +98,7 @@ class CommentCommandApiTest: FreeSpec({
 
                 // when
                 mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/v1/comments/{petfairId}",1L)
+                    MockMvcRequestBuilders.post("/api/v1/petfairs/{petfairId}/comments",1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
@@ -115,7 +114,7 @@ class CommentCommandApiTest: FreeSpec({
 
                 // when
                 mockMvc.perform(
-                    MockMvcRequestBuilders.post("/api/v1/comments/{petfairId}",1L)
+                    MockMvcRequestBuilders.post("/api/v1/petfairs/{petfairId}/comments",1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
@@ -141,15 +140,14 @@ class CommentCommandApiTest: FreeSpec({
                 1L,
                 commentUpdateRequest.content,
                 "",
-                "",
-                0
+                ""
             )
 
             every { editCommentUseCase.updateComment(any(), any(), any()) } returns commentUpdateResponse
 
             // when
             mockMvc.perform(
-                MockMvcRequestBuilders.patch("/api/v1/comments/{petfairId}/{commentId}",1L, 1L)
+                MockMvcRequestBuilders.patch("/api/v1/petfairs/{petfairId}/comments/{commentId}",1L, 1L)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding("UTF-8")
@@ -170,7 +168,7 @@ class CommentCommandApiTest: FreeSpec({
 
                 // when, then
                 mockMvc.perform(
-                    MockMvcRequestBuilders.patch("/api/v1/comments/{petfairId}/{commentId}",1L, 1L)
+                    MockMvcRequestBuilders.patch("/api/v1/petfairs/{petfairId}/comments/{commentId}",1L, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
@@ -186,7 +184,7 @@ class CommentCommandApiTest: FreeSpec({
 
                 // when, then
                 mockMvc.perform(
-                    MockMvcRequestBuilders.patch("/api/v1/comments/{petfairId}/{commentId}",1L, 1L)
+                    MockMvcRequestBuilders.patch("/api/v1/petfairs/{petfairId}/comments/{commentId}",1L, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
@@ -206,7 +204,7 @@ class CommentCommandApiTest: FreeSpec({
 
             // when
             mockMvc.perform(
-                MockMvcRequestBuilders.delete("/api/v1/comments/{petfairId}/{commentId}",1L, 1L)
+                MockMvcRequestBuilders.delete("/api/v1/petfairs/{petfairId}/comments/{commentId}",1L, 1L)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .characterEncoding("UTF-8")
@@ -222,7 +220,7 @@ class CommentCommandApiTest: FreeSpec({
 
                 // when, then
                 mockMvc.perform(
-                    MockMvcRequestBuilders.delete("/api/v1/comments/{petfairId}/{commentId}",1L, 1L)
+                    MockMvcRequestBuilders.delete("/api/v1/petfairs/{petfairId}/comments/{commentId}",1L, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
@@ -237,7 +235,7 @@ class CommentCommandApiTest: FreeSpec({
 
                 // when, then
                 mockMvc.perform(
-                    MockMvcRequestBuilders.delete("/api/v1/comments/{petfairId}/{commentId}",1L, 1L)
+                    MockMvcRequestBuilders.delete("/api/v1/petfairs/{petfairId}/comments/{commentId}",1L, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")
@@ -252,7 +250,7 @@ class CommentCommandApiTest: FreeSpec({
 
                 // when, then
                 mockMvc.perform(
-                    MockMvcRequestBuilders.delete("/api/v1/comments/{petfairId}/{commentId}",1L, 1L)
+                    MockMvcRequestBuilders.delete("/api/v1/petfairs/{petfairId}/comments/{commentId}",1L, 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .characterEncoding("UTF-8")

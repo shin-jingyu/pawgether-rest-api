@@ -5,6 +5,11 @@ import jakarta.validation.constraints.NotNull;
 
 public final class ReplyCommandDto {
 
+    public record ReplyCreateBody(
+            @NotBlank(message = "답글 내용을 입력해주세요.")
+            String content
+    ) {}
+
     public record ReplyCreateRequest(
             @NotNull(message = "commentId을 입력해주세요.")
             long commentId,
@@ -19,6 +24,11 @@ public final class ReplyCommandDto {
             String content,
             String createdAt,
             String updatedAt
+    ) {}
+
+    public record ReplyUpdateBody(
+            @NotBlank(message = "답글 내용을 입력해주세요.")
+            String content
     ) {}
 
     public record ReplyUpdateRequest(

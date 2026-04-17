@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/comments")
+@RequestMapping("/api/v1/petfairs/{petfairId}/comments")
 @RequiredArgsConstructor
 @Slf4j
 public class CommentCommandApi {
@@ -30,17 +30,18 @@ public class CommentCommandApi {
     private final EditCommentUseCase editCommentUseCase;
     private final DeleteCommentUseCase deleteCommentUseCase;
 
-    @PostMapping("/{petfairId}")
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public CommentCreateResponse commentCreate(@PathVariable long petfairId, @RequestBody @Validated CommentCreateRequest request) {
         return registryCommentUseCase.createComment(petfairId, request);
     }
 
-    @PatchMapping("/{petfairId}/{commentId}")
+    @PatchMapping("/{commentId}")
     public CommentUpdateResponse commentUpdate(@PathVariable long petfairId, @PathVariable long commentId, @RequestBody @Validated CommentUpdateRequest request) {
         return editCommentUseCase.updateComment(petfairId, commentId, request);
     }
 
-    @DeleteMapping("/{petfairId}/{commentId}")
+    @DeleteMapping("/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteComment(@PathVariable long petfairId, @PathVariable long commentId) {
         deleteCommentUseCase.deleteComment(petfairId, commentId);

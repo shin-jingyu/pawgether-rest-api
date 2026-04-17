@@ -74,9 +74,9 @@ class PetFairMainQueryApiTest: FreeSpec({
     "Comment 목록 조회" - {
         "조회 성공" {
             val commentQueryDtoList = listOf(
-                CommentQueryDto.MainCommentDto(1L, 1L, "abc", "cccc", "", "", 0),
-                CommentQueryDto.MainCommentDto(2L, 2L, "def", "def", "", "", 0),
-                CommentQueryDto.MainCommentDto(3L, 3L, "def", "def", "", "", 0)
+                CommentQueryDto.MainCommentDto(1L, 1L, "abc", "cccc", "", ""),
+                CommentQueryDto.MainCommentDto(2L, 2L, "def", "def", "", ""),
+                CommentQueryDto.MainCommentDto(3L, 3L, "def", "def", "", "")
             )
             val mainCommentResponse = MainCommentResponse(commentQueryDtoList)
 

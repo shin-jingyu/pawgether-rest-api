@@ -34,9 +34,9 @@ class CommentQueryServiceTest: FreeSpec({
         "댓글 조회 성공" {
             // given
             var readCommentDtos = listOf(
-                CommentQueryDto.ReadCommentDto(1L, 1L, "abc", "test", "", "", 0),
-                CommentQueryDto.ReadCommentDto(2L, 1L, "abc", "test", "", "", 0),
-                CommentQueryDto.ReadCommentDto(3L, 1L, "abc", "test", "", "", 0)
+                CommentQueryDto.ReadCommentDto(1L, 1L, "abc", "test", "", ""),
+                CommentQueryDto.ReadCommentDto(2L, 1L, "abc", "test", "", ""),
+                CommentQueryDto.ReadCommentDto(3L, 1L, "abc", "test", "", "")
             )
 
             var readCommentResponse = CommentQueryDto.ReadCommentResponse(
@@ -72,9 +72,9 @@ class CommentQueryServiceTest: FreeSpec({
     "메인 페이지 댓글 조회" - {
         "메인 페이지 댓글 조회 성공" {
             val mainCommentDto = listOf(
-                MainCommentDto(1L, 1L, "abc", "test", "", "", 0),
-                MainCommentDto(2L, 1L, "abc", "test", "", "", 0),
-                MainCommentDto(3L, 1L, "abc", "test", "", "", 0)
+                MainCommentDto(1L, 1L, "abc", "test", "", ""),
+                MainCommentDto(2L, 1L, "abc", "test", "", ""),
+                MainCommentDto(3L, 1L, "abc", "test", "", "")
             )
             val mainCommentResponse = MainCommentResponse(mainCommentDto)
 

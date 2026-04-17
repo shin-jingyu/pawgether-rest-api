@@ -31,9 +31,9 @@ class ReplyQueryApiTest: FreeSpec({
         "답글 조회 성공" {
             // given
             var ReplyReadDtos = listOf(
-                ReplyQueryDto.ReplyReadDto(1L, 1L, "test1", "test", "", "", 0),
-                ReplyQueryDto.ReplyReadDto(2L, 1L, "test2", "test", "", "", 0),
-                ReplyQueryDto.ReplyReadDto(3L, 1L, "test3", "test", "", "", 0)
+                ReplyQueryDto.ReplyReadDto(1L, 1L, "test1", "test", "", ""),
+                ReplyQueryDto.ReplyReadDto(2L, 1L, "test2", "test", "", ""),
+                ReplyQueryDto.ReplyReadDto(3L, 1L, "test3", "test", "", "")
             )
             var replyReadResponse = ReplyQueryDto.ReplyReadResponse(
                 false,
@@ -44,7 +44,7 @@ class ReplyQueryApiTest: FreeSpec({
 
             // when
             mockMvc.perform(
-                MockMvcRequestBuilders.get("/api/v1/replies/{commentId}",1L)
+                MockMvcRequestBuilders.get("/api/v1/comments/{commentId}/replies",1L)
             ).andExpect(status().isOk)
                 .andExpect(jsonPath("$.hasMore").value(false))
                 .andExpect(jsonPath("$.nextCursor").value(0))
@@ -59,7 +59,7 @@ class ReplyQueryApiTest: FreeSpec({
 
                 // then,when
                 mockMvc.perform(
-                    MockMvcRequestBuilders.get("/api/v1/replies/{commentId}",1L)
+                    MockMvcRequestBuilders.get("/api/v1/comments/{commentId}/replies",1L)
                 ).andExpect(status().is4xxClientError)
                     .andExpect(jsonPath("$.code").value("NOT_FOUND_COMMENT_CALENDAR"))
                     .andExpect(jsonPath("$.status").value(HttpStatus.NOT_FOUND.value()))
